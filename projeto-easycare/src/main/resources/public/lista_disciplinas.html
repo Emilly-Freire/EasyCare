@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${(titulo)! "Minhas Disciplinas"}</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/disciplinas.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .card-disciplina {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .card-disciplina:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/disciplinas">ConcluiAí</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/disciplinas">Disciplinas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Sair</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <h2 class="mb-4">${(titulo)! "Minhas Disciplinas"}</h2>
+
+        <#if sucesso??>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                ${sucesso}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </#if>
+        
+        <#if erro??>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                ${erro}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </#if>
+        
+        <#if aviso??>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                ${aviso}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </#if>
+
+        <div class="d-flex justify-content-end mb-3">
+            <a href="/disciplinas/cadastro" class="btn btn-primary" onclick="event.preventDefault(); toggleForm();">
+                <i class="bi bi-plus-circle-fill"></i> Adicionar Nova Disciplina
+            </a>
+        </div>
+
+        <#if disciplinas?? && (disciplinas?size > 0)>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                <#list disciplinas as disciplina>
+                    <div class="col" id="card-${disciplina.id}">
+                        <div class="card h-100 card-disciplina" onclick="window.location.href='/disciplinas/${disciplina.id}'">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">${disciplina.nome}</h5>
+                                <p class="card-text">${disciplina.descricao}</p>
+                            </div>
+                            <div class="card-footer bg-white border-0 d-flex justify-content-end gap-2">
+                                <a href="/disciplinas/${disciplina.id}" class="btn btn-sm btn-success" onclick="event.preventDefault();" title="Ver Checklist">
+                                    <i class="bi bi-list-check"></i> Checklist
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </#list>
+            </div>
+        <#else>
+            <div class="alert alert-info text-center mt-5">
+                <h4 class="alert-heading">Nenhuma disciplina cadastrada!</h4>
+                <p>Use o botão "Adicionar Nova Disciplina" para começar a montar seu checklist.</p>
+                <a href="/disciplinas/cadastro" class="btn btn-info mt-2" onclick="event.preventDefault(); toggleForm();">Cadastrar Disciplina</a>
+            </div>
+        </#if>      
+    </div>
+
+    <div id="sobreTela" class="sobreTela" onclick="fecharQualquer()"></div>
+
+    <div id="formDisciplina" class="modal">
+        <h3>Cadastrar Disciplina</h3>
+
+        <form action="/disciplinas/cadastro" method="POST">
+            
+            <div class="mb-3">
+                <label for="nome" class="nomeLabel">Nome da Disciplina</label>
+                <input type="text" name="nome" id="nome" class="nomeControl" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="descricao" class="descricaoLabel">Descrição</label>
+                <textarea name="descricao" id="descricao" class="descricaoControl" rows="3"></textarea>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary" onclick="toggleForm()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+    
+
+    <script src="./js/disciplina.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

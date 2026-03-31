@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${disciplina.nome! "Checklist da Disciplina"}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .concluida {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px !important;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #0052ce !important;
+
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/disciplinas">ConcluiAí</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/disciplinas"><i class="bi bi-arrow-left"></i> Voltar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Sair</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mt-4">
+        
+        <div class="mb-4 p-3 bg-light rounded shadow-sm">
+            <h2 class="text-primary"><i class="bi bi-journal-check"></i> Checklist: ${disciplina.nome!}</h2>
+            <p class="text-muted mb-0">${disciplina.descricao!}</p>
+        </div>
+
+        <#if sucesso??>
+            <div class="alert alert-success" role="alert">${sucesso}</div>
+        </#if>
+        <#if erro??>
+            <div class="alert alert-danger" role="alert">${erro}</div>
+        </#if>
+
+        <!-- Variável 'topicoEditando' para saber se é um cadastro ou edição -->
+        <#assign isEditingTopico = (topicoEditando??)>
+        
+        <div class="card mb-4 ${isEditingTopico?then('border-warning', 'border-info')}">
+            <div class="card-header ${isEditingTopico?then('bg-warning text-dark', 'bg-info text-white')}">
+                <h5 class="mb-0">
+                    <#if isEditingTopico>
+                        <i class="bi bi-pencil-square"></i> Editar Tópico: ${topicoEditando.titulo!}
+                    <#else>
+                        <i class="bi bi-plus-circle-fill"></i> Novo Tópico
+                    </#if>
+                </h5>
+            </div>
+            <div class="card-body">
+                <form action="${isEditingTopico?then('/topicos/' + topicoEditando.id + '/editar', '/topicos/cadastro')}" method="POST">
+                    <input type="hidden" name="idDisciplina" value="${disciplina.id}"> 
+                    
+                    <div class="mb-3">
+                        <label for="tituloTopico" class="form-label">Título do Tópico</label>
+                        <input type="text" name="titulo" id="tituloTopico" class="form-control" 
+                               value="${isEditingTopico?then(topicoEditando.titulo!, '')}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descricaoTopico" class="form-label">Descrição</label>
+                        <textarea name="descricao" id="descricaoTopico" class="form-control" rows="2">${isEditingTopico?then(topicoEditando.descricao!, '')}</textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <#if isEditingTopico>
+                            <a href="/disciplinas/${disciplina.id}" class="btn btn-secondary">Cancelar Edição</a>
+                        </#if>
+                        <button type="submit" class="btn ${isEditingTopico?then('btn-warning', 'btn-info')}">
+                            <#if isEditingTopico>Salvar Alterações<#else>Salvar Tópico</#if>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <h3 class="mt-5 mb-3">Tópicos e Atividades</h3>
+        
+        <#if topicos?? && (topicos?size > 0)>
+            <#list topicos as topico>
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 text-dark">${topico.titulo!}</h5>
+                            <small class="text-muted">${topico.descricao!}</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="/topicos/${topico.id}/editar" class="btn btn-warning btn-sm" title="Editar Tópico">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form action="/topicos/${topico.id}/excluir" method="POST" class="d-inline">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir Tópico" 
+                                        onclick="return confirm('Tem certeza que deseja excluir o tópico ${topico.titulo} e suas atividades?');">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <form action="/atividades/cadastro" method="POST" class="mb-3">
+                            <input type="hidden" name="id_topicos" value="${topico.id}"> 
+                            <div class="input-group">
+                                <input type="text" name="descricao" class="form-control" placeholder="Adicionar nova atividade..." required>
+                                <input type="date" name="data_entrega" class="form-control">
+                                <button class="btn btn-outline-success" type="submit">
+                                    <i class="bi bi-plus-lg"></i> Adicionar
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <#if topico.atividades?? && (topico.atividades?size > 0)>
+                            <ul class="list-group list-group-flush mt-3">
+                                <#list topico.atividades as atividade>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center activity-item">
+                                        
+                                        <div class="form-check d-flex align-items-center">
+                                            <form action="/atividades/${atividade.id}/concluir" method="POST" class="d-inline me-3">
+                                                <input type="hidden" name="status_atual" value="${atividade.status?string("true","false")}">
+                                                <input type="hidden" name="id_disciplina_redirecionar" value="${disciplina.id}">
+                                                
+                                                <button type="submit" class="btn btn-sm p-0" style="border: none; background: none;"
+                                                        title="${atividade.status?then('Desmarcar', 'Concluir')}">
+                                                    <i class="bi ${atividade.status?then('bi-check-circle-fill text-success', 'bi-circle text-secondary')} fs-5"></i>
+                                                </button>
+                                            </form>
+                                            
+                                            <span class="${atividade.status?then('concluida', '')}">
+                                                ${atividade.descricao!}
+                                                <#if atividade.dataEntrega??>
+                                                    <small class="text-secondary ms-2">(Concluído em: ${atividade.dataEntrega?string("dd/MM/yyyy")})</small>
+                                                </#if>
+                                            </span>
+                                        </div>
+
+                                        <form action="/atividades/${atividade.id}/excluir" method="POST" class="d-inline">
+                                            <input type="hidden" name="id_disciplina_redirecionar" value="${atividade.topico.disciplina.id}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir Atividade" 
+                                                    onclick="return confirm('Tem certeza que deseja excluir a atividade: ${atividade.descricao}?');">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                        
+                                    </li>
+                                </#list>
+                            </ul>
+                        <#else>
+                            <p class="text-muted fst-italic mb-0 mt-3">Nenhuma atividade cadastrada.</p>
+                        </#if>
+                    </div>
+                </div>
+            </#list>
+        <#else>
+            <div class="alert alert-info text-center mt-5">
+                <h4 class="alert-heading">Nenhum Tópico cadastrado!</h4>
+                <p>Use o formulário acima para adicionar seu primeiro Tópico.</p>
+            </div>
+        </#if>
+        
+    </div>
+</body>
+</html>
